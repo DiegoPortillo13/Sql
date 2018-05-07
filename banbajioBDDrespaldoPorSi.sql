@@ -103,55 +103,57 @@ where t.cuenta_no_cuenta=cn.no_cuenta
    and cn.sucursal_no_sucursal=s.no_sucursal
 group by s.no_sucursal,m.id_movimiento ;
 /*1.-*/
-select c.nombre, cn.tipo_cuenta_no_tipo,tp.descripcion
+select c.no_cliente,c.nombre, cn.no_cuenta, tp.descripcion
 from cuenta cn, tipo_cuenta tp, cliente c
 where cn.tipo_cuenta_no_tipo=tp.no_tipo
 	and cn.cliente_no_cliente=c.no_cliente
-order by c.nombre;
+order by c.no_cliente;
 /*2.-*/
-select s.nombre, e.nombre
+select s.nombre  , e.nombre 
 from sucursal s, empleado e
 where e.sucursal_no_sucursal=s.no_sucursal
 order by s.no_sucursal;
 
 /*3.-*/
-select m.descripcion, sum(t.cantidad)
+select m.descripcion, sum(t.cantidad) 
 from movimiento m, transaccion t
 where t.movimiento_id_movimiento=m.id_movimiento
 group by m.descripcion;
 
 /*4.-*/
-select s.nombre, count(m.id_movimiento)
+select s.nombre,m.descripcion ,count(*), sum(t.cantidad)
 from movimiento m, sucursal s,cuenta cn, transaccion t
 where cn.sucursal_no_sucursal=s.no_sucursal
 	and t.cuenta_no_cuenta=cn.no_cuenta
 		and t.movimiento_id_movimiento=m.id_movimiento
-group by s.nombre;
+group by s.no_sucursal, m.id_movimiento;
 
 /*5.-*/
-select c.nombre,c.a_paterno,c.a_materno,count(m.id_movimiento)
+select c.no_cliente, c.nombre,c.a_paterno,c.a_materno,cn.no_cuenta, t.no_transaccion, t.cantidad, t.fecha, m.descripcion
 from cuenta cn, cliente c, transaccion t, movimiento m
 where t.movimiento_id_movimiento=m.id_movimiento
 	and t.cuenta_no_cuenta=cn.no_cuenta
 		and cn.cliente_no_cliente=c.no_cliente
-group by c.nombre;
+group by c.no_cliente;
 
 /*6.-*/
-select tc.descripcion, count(m.id_movimiento)
-from tipo_cuenta tc, movimiento m,transaccion t,cuenta cn
+select tc.descripcion, m.descripcion, count(*), sum(t.cantidad) 
+from tipo_cuenta tc, movimiento m,transaccion t,cuenta cn, cliente c
 where cn.tipo_cuenta_no_tipo=tc.no_tipo
 	and t.movimiento_id_movimiento=m.id_movimiento
 		and t.cuenta_no_cuenta=cn.no_cuenta
+        and cn.cliente_no_cliente=c.no_cliente
 group by tc.no_tipo;
 
 /*7.-*/
-select s.nombre, count(cn.no_cuenta)
-from cuenta cn, sucursal s
+select s.nombre, tc.descripcion, count(*)
+from cuenta cn, sucursal s, tipo_cuenta tc
 where cn.sucursal_no_sucursal=s.no_sucursal
-group by s.nombre;
+and cn.tipo_cuenta_no_tipo=tc.no_tipo
+group by s.no_sucursal, tc.no_tipo;
 
 /*8.-*/
-select c.nombre,c.a_paterno,c.a_materno, max(cn.saldo)
+select c.nombre,c.a_paterno,c.a_materno, max(cn.saldo) "Saldo" 
 from cliente c, cuenta cn
 where cn.cliente_no_cliente=c.no_cliente
 order by cn.saldo;
